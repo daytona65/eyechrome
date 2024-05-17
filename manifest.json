@@ -1,0 +1,10 @@
+{
+    "manifest_version": 3,
+    "name": "eyechrome",
+    "description": "extension",
+    "version": "1.0",
+    "action": {
+      "default_popup": "main.html",
+      "default_icon": "eyelogo.png"
+    }
+  }
