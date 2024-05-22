@@ -1,32 +1,69 @@
-// Grab elements, create settings, etc.
-var video = document.getElementById('video');
 
-// Get access to the camera!
-// if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-//     // Not adding `{ audio: true }` since we only want video now
-//     navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
-//         video.src = window.URL.createObjectURL(stream);
-//         video.srcObject = stream;
-//         video.play();
-//     });
-// }
+const webCam = document.getElementById("webcam");
+let isStreamActive = false;
 
-navigator.mediaDevices.getUserMedia({video: true})
-    .then(gotMedia)
-    .catch(error => console.error('getUserMedia() error:', error)); //Permission must be granted first
+document.getElementById("toggleWebcam").addEventListener("click", () => {
+	if (isStreamActive) {
+		stopWebcam();
+	} else {
+		startWebcam();
+	}
+});
 
+function startWebcam() {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    .then(stream => {
+		
+		webCam.srcObject = stream;
+		webCam.play();
+		isStreamActive = true;
 
+		// Capture image frames
+		captureFrames(stream);
+    })
+    .catch((err) => {
+		console.error("getUserMedia() error:", err);
+		let errorMessage = "An error occurred: ";
+		switch (err.name) {
+		case "NotAllowedError":
+			errorMessage += "Permission to access camera was denied.";
+			break;
+		case "NotFoundError":
+			errorMessage += "No camera device found.";
+			break;
+		case "NotReadableError":
+			errorMessage += "Camera is already in use by another application.";
+			break;
+		default:
+			errorMessage += err.message;
+		}
+		document.getElementById("error").textContent = errorMessage;
+	});
 
-function gotMedia(mediaStream) {
-    const mediaStreamTrack = mediaStream.getVideoTracks()[0];
+    
+}
+
+function stopWebcam() {
+	stream = webCam.srcObject;
+    stream.getTracks().forEach((track) => {
+        if (track.readyState == 'live' && track.kind === 'video') {
+            track.stop();
+        }
+    });
+	webCam.srcObject = null;
+	isStreamActive = false;
+}
+
+function captureFrames(stream) {
+	const mediaStreamTrack = stream.getVideoTracks()[0];
     const imageCapture = new ImageCapture(mediaStreamTrack);
-    imageCapture.grabFrame()
-        .then(imageBitmap => {
-            video.width = imageBitmap.width;
-            video.height = imageBitmap.height;
-            video.getContext('2d').drawImage(imageBitmap, 0, 0);
-        })
-        .catch(error => console.error('grabFrame() error:', error));
-        video.play()
-        console.log(imageCapture);
+    // imageCapture.grabFrame()
+    //     .then(imageBitmap => {
+    //         webCam.width = imageBitmap.width;
+    //         webCam.height = imageBitmap.height;
+    //         webCam.getContext('2d').drawImage(imageBitmap, 0, 0);
+    //     })
+    //     .catch(error => console.error('grabFrame() error:', error));
+    //     webCam.play()
+    //     console.log(imageCapture);
 }

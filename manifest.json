@@ -14,7 +14,12 @@
       "48": "assets/eyelogo.png",
       "128": "assets/eyelogo.png"
     },
+    "background": {
+      "scripts": ["background.js"]
+    },
     "permissions": [
-      "activeTab"
+      "activeTab",
+      "videoCapture",
+      "background"
     ]
 }
