@@ -8,6 +8,14 @@
       "default_popup": "html/index.html",
       "default_icon": "assets/eyelogo.png"
     },
+    "content_scripts": [
+      {
+        "matches": [
+          "<all_urls>"
+        ],
+        "js": ["scripts/content.js"]
+      }
+    ],
     "icons": {
       "16": "assets/eyelogo.png",
       "32": "assets/eyelogo.png",
@@ -15,11 +23,12 @@
       "128": "assets/eyelogo.png"
     },
     "background": {
-      "scripts": ["background.js"]
+      "service_worker": "scripts/background.js"
     },
     "permissions": [
       "activeTab",
-      "videoCapture",
+      "storage",
+      "unlimitedStorage",
       "background"
     ]
 }

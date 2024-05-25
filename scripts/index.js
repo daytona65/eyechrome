@@ -1,25 +1,34 @@
 
 const webCam = document.getElementById("webcam");
+let canvas = document.querySelector("canvas");
 let isStreamActive = false;
 
-document.getElementById("toggleWebcam").addEventListener("click", () => {
+document.querySelector("#toggleWebcam").addEventListener("click", () => {
 	if (isStreamActive) {
 		stopWebcam();
+		document.querySelector('#toggleWebcam').innerHTML =
+      	'Enable Webcam';
+		document.querySelector('#toggleWebcam').style.border = 
+		'5px solid green';
+
 	} else {
 		startWebcam();
+		document.querySelector('#toggleWebcam').innerHTML =
+      	'Disable Webcam';
+		document.querySelector('#toggleWebcam').style.border = 
+		'5px solid red';
 	}
 });
 
 function startWebcam() {
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
     .then(stream => {
-		
 		webCam.srcObject = stream;
-		webCam.play();
 		isStreamActive = true;
-
-		// Capture image frames
-		captureFrames(stream);
+		// Capture image frames and perform live-manipulation
+		const mediaStreamTrack = stream.getVideoTracks()[0];
+    	let imageCapture = new ImageCapture(mediaStreamTrack);
+		captureFrames(imageCapture);
     })
     .catch((err) => {
 		console.error("getUserMedia() error:", err);
@@ -39,8 +48,6 @@ function startWebcam() {
 		}
 		document.getElementById("error").textContent = errorMessage;
 	});
-
-    
 }
 
 function stopWebcam() {
@@ -54,16 +61,19 @@ function stopWebcam() {
 	isStreamActive = false;
 }
 
-function captureFrames(stream) {
-	const mediaStreamTrack = stream.getVideoTracks()[0];
-    const imageCapture = new ImageCapture(mediaStreamTrack);
-    // imageCapture.grabFrame()
-    //     .then(imageBitmap => {
-    //         webCam.width = imageBitmap.width;
-    //         webCam.height = imageBitmap.height;
-    //         webCam.getContext('2d').drawImage(imageBitmap, 0, 0);
-    //     })
-    //     .catch(error => console.error('grabFrame() error:', error));
-    //     webCam.play()
-    //     console.log(imageCapture);
+function captureFrames(imageCapture) {
+	
+	const frameGrabber = async () => {
+		imageCapture
+		.grabFrame()
+        .then(imageBitmap => {
+			console.log("Grabbed frame!: ", imageBitmap);
+            canvas.width = imageBitmap.width;
+            canvas.height = imageBitmap.height;
+            canvas.getContext('2d').drawImage(imageBitmap, 0, 0);
+			canvas.classList.remove("hidden"); //unhides the canvas
+        })
+        .catch(error => console.error('grabFrame() error:', error));
+	}
+    
 }

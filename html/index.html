@@ -5,14 +5,16 @@
     </head>
     <body>
         <div class="header">
+            <h2 class="title"> eyechr </h2>
             <image src="../assets/eyelogo.png" class="logo"></image>
-            <h3 class="title"> eyechrome </h3>
+            <h2 class="title">me</h2>
         </div>
-        <video id="webcam" width="400" height="300" playsinline>Video stream unavailable.</video>
-        <button id="toggleWebcam">On/Off</button>
+        <video id="webcam" playsinline autoplay="true">Video stream unavailable.</video>
+        <button id="toggleWebcam">Enable Webcam</button>
         <p id="error" style="color: red;"></p>
         <h2 id="time"></h2>
+        <!-- <canvas id="canvas"></canvas> -->
     </body>
     <script src="../scripts/time.js"></script> 
-    <script src="../scripts/webcam.js"></script>
+    <script src="../scripts/index.js"></script>
 </html>
