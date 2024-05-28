@@ -9,12 +9,15 @@
             <image src="../assets/eyelogo.png" class="logo"></image>
             <h2 class="title">me</h2>
         </div>
-        <video id="webcam" playsinline autoplay="true">Video stream unavailable.</video>
+        <video id="webcam" playsinline muted autoplay>Video stream unavailable.</video>
         <button id="toggleWebcam">Enable Webcam</button>
         <p id="error" style="color: red;"></p>
         <h2 id="time"></h2>
         <!-- <canvas id="canvas"></canvas> -->
     </body>
-    <script src="../scripts/time.js"></script> 
-    <script src="../scripts/index.js"></script>
+    <script defer src="../scripts/time.js"></script>
+    <script defer src="../scripts/background.js"></script>
+    <script defer src="../scripts/face-api.js"></script>
+    <script defer src="../scripts/index.js"></script>
+    
 </html>

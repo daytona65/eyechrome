@@ -8,3 +8,6 @@ chrome.runtime.onInstalled.addListener(() => {
 // });
 
 let canvas = new OffscreenCanvas(300, 200);
+Promise.all([
+    faceapi
+])
