@@ -16,6 +16,9 @@
         "js": ["scripts/content.js"]
       }
     ],
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+    },
     "icons": {
       "16": "assets/eyelogo.png",
       "32": "assets/eyelogo.png",
@@ -28,6 +31,7 @@
     "permissions": [
       "activeTab",
       "storage",
+      "tabs",
       "unlimitedStorage",
       "background"
     ]

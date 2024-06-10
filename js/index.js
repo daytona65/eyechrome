@@ -62,7 +62,6 @@ function stopWebcam() {
 }
 
 function captureFrames(imageCapture) {
-	
 	const frameGrabber = async () => {
 		imageCapture
 		.grabFrame()
