@@ -1,7 +1,7 @@
 
 const webCam = document.getElementById("webcam");
 let canvas = document.querySelector("canvas");
-let isStreamActive = false;
+let isStreamActive = getState().isStreamActive;
 
 document.querySelector("#toggleWebcam").addEventListener("click", () => {
 	if (isStreamActive) {
@@ -20,11 +20,39 @@ document.querySelector("#toggleWebcam").addEventListener("click", () => {
 	}
 });
 
+async function getState() {
+	const response = await chrome.runtime.sendMessage({ type: 'GET_STATE' })
+	console.log(response);
+	// return new Promise((resolve, reject) => {
+	// 	chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
+	// 	if (chrome.runtime.lastError) {
+	// 		console.error('Error getting state:', chrome.runtime.lastError);  // Error log
+	// 		reject(chrome.runtime.lastError);
+	// 	} else {
+	// 		resolve(response);
+	// 	}
+	// 	});
+	// });
+}
+
+function setState(newState) {
+	return new Promise((resolve, reject) => {
+	  chrome.runtime.sendMessage({ type: 'SET_STATE', state: newState }, (response) => {
+		if (chrome.runtime.lastError) {
+			console.error('Error setting state:', chrome.runtime.lastError);  // Error log
+		  reject(chrome.runtime.lastError);
+		} else {
+		  resolve(response);
+		}
+	  });
+	});
+}
+  
 function startWebcam() {
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
     .then(stream => {
 		webCam.srcObject = stream;
-		isStreamActive = true;
+		setState({ isStreamActive: true });
 		// Capture image frames and perform live-manipulation
 		const mediaStreamTrack = stream.getVideoTracks()[0];
     	let imageCapture = new ImageCapture(mediaStreamTrack);
@@ -58,8 +86,8 @@ function stopWebcam() {
         }
     });
 	webCam.srcObject = null;
-	isStreamActive = false;
-}
+	setState({ isStreamActive: false });
+}4
 
 function captureFrames(imageCapture) {
 	const frameGrabber = async () => {

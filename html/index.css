@@ -42,8 +42,12 @@ canvas {
 .title {
 }
 
-.welcome {
+#permission {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    left: 30%;
+    top: 40%;
+    position: absolute;
+    text-align: center;
+    background-color: red;
+    color: white;
 }
