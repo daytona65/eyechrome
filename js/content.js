@@ -4,9 +4,16 @@ const script = document.createElement('script');
 console.log("1!");
 script.src = chrome.runtime.getURL('webgazer.js');
 console.log("2!");
-document.head.appendChild(script);
+// document.head.appendChild(script);
 console.log("is it really!");
-
+chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
+  if (chrome.runtime.lastError) {
+    console.error('Error getting state:', chrome.runtime.lastError);
+  } else {
+   console.log("success", response)
+  }
+})
+console.log(response);
 script.onload = function() {
   script.remove();
 

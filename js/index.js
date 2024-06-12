@@ -23,16 +23,16 @@ document.querySelector("#toggleWebcam").addEventListener("click", () => {
 async function getState() {
 	const response = await chrome.runtime.sendMessage({ type: 'GET_STATE' })
 	console.log(response);
-	// return new Promise((resolve, reject) => {
-	// 	chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
-	// 	if (chrome.runtime.lastError) {
-	// 		console.error('Error getting state:', chrome.runtime.lastError);  // Error log
-	// 		reject(chrome.runtime.lastError);
-	// 	} else {
-	// 		resolve(response);
-	// 	}
-	// 	});
-	// });
+	return new Promise((resolve, reject) => {
+		chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
+		if (chrome.runtime.lastError) {
+			console.error('Error getting state:', chrome.runtime.lastError);  // Error log
+			reject(chrome.runtime.lastError);
+		} else {
+			resolve(response);
+		}
+		});
+	});
 }
 
 function setState(newState) {
