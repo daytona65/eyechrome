@@ -5,14 +5,14 @@ let isStreamActive = getState().isStreamActive;
 
 document.querySelector("#toggleWebcam").addEventListener("click", () => {
 	if (isStreamActive) {
-		stopWebcam();
+		setState({ isStreamActive: false });
 		document.querySelector('#toggleWebcam').innerHTML =
       	'Enable Webcam';
 		document.querySelector('#toggleWebcam').style.border = 
 		'5px solid green';
 
 	} else {
-		startWebcam();
+		setState({ isStreamActive: true });
 		document.querySelector('#toggleWebcam').innerHTML =
       	'Disable Webcam';
 		document.querySelector('#toggleWebcam').style.border = 
@@ -20,17 +20,16 @@ document.querySelector("#toggleWebcam").addEventListener("click", () => {
 	}
 });
 
-async function getState() {
-	const response = await chrome.runtime.sendMessage({ type: 'GET_STATE' })
-	console.log(response);
+function getState() {
 	return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
-		if (chrome.runtime.lastError) {
-			console.error('Error getting state:', chrome.runtime.lastError);  // Error log
-			reject(chrome.runtime.lastError);
-		} else {
-			resolve(response);
-		}
+			if (chrome.runtime.lastError) {
+				console.error('Error getting state:', chrome.runtime.lastError);  // Error log
+				reject(chrome.runtime.lastError);
+			} else {
+				console.log('index received state', response)
+				resolve(response);
+			}
 		});
 	});
 }
@@ -87,7 +86,7 @@ function stopWebcam() {
     });
 	webCam.srcObject = null;
 	setState({ isStreamActive: false });
-}4
+}
 
 function captureFrames(imageCapture) {
 	const frameGrabber = async () => {
@@ -102,5 +101,4 @@ function captureFrames(imageCapture) {
         })
         .catch(error => console.error('grabFrame() error:', error));
 	}
-    
 }
