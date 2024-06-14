@@ -41,7 +41,7 @@ document.querySelector("#toggleWebcam").addEventListener("click", () => {
 	});
 });
 
-async function getState() {
+function getState() {
 	return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
 			if (!response) {
@@ -96,6 +96,7 @@ function startWebcam() {
 	});
 }
 
+// TODO: getTracks does not exist in null (stream)
 function stopWebcam() {
 	console.log("Stopping Webcam")
 	stream = webCam.srcObject;
@@ -108,6 +109,25 @@ function stopWebcam() {
 	setState({ isStreamActive: false });
 }
 
+// WebGazer
+const script = document.createElement('script');
+script.src = chrome.runtime.getURL('webgazer.js');
+script.onload = function() {
+	script.remove();
+
+	// Start WebGazer
+	webgazer.setRegression('ridge')
+			.setGazeListener((data, elapsedTime) => {
+				if (data == null) {
+				return;
+				}
+				const xPrediction = data.x;
+				const yPrediction = data.y;
+				console.log(`x: ${xPrediction}, y: ${yPrediction}`);
+			}).begin();
+};
+
+// Framecapture
 function captureFrames(imageCapture) {
 	const frameGrabber = async () => {
 		imageCapture
