@@ -1,18 +1,42 @@
 
 const webCam = document.getElementById("webcam");
 let canvas = document.querySelector("canvas");
-let isStreamActive = getState().isStreamActive;
+let isStreamActive;
+
+getState().then((response) => {
+	isStreamActive = response.isStreamActive
+	console.log("getState result 1: ", isStreamActive);
+	if (isStreamActive) {
+		console.log("Fresh start")
+		startWebcam();
+		document.querySelector('#toggleWebcam').innerHTML =
+		  'Disable Webcam';
+		document.querySelector('#toggleWebcam').style.border = 
+		'5px solid red';
+	}
+}).catch(error => {
+	console.error('Error in getting state', error);
+});
+
+
 
 document.querySelector("#toggleWebcam").addEventListener("click", () => {
+	getState().then(response => {
+		isStreamActive = response.isStreamActive
+		console.log('getState result 2: ', response.isStreamActive);
+	}).catch(error => {
+		console.error('Error in getting state', error);
+	});
+	console.log("button pressed, stream is: ", isStreamActive);
 	if (isStreamActive) {
-		setState({ isStreamActive: false });
+		stopWebcam();
 		document.querySelector('#toggleWebcam').innerHTML =
       	'Enable Webcam';
 		document.querySelector('#toggleWebcam').style.border = 
 		'5px solid green';
 
 	} else {
-		setState({ isStreamActive: true });
+		startWebcam();
 		document.querySelector('#toggleWebcam').innerHTML =
       	'Disable Webcam';
 		document.querySelector('#toggleWebcam').style.border = 
@@ -20,15 +44,13 @@ document.querySelector("#toggleWebcam").addEventListener("click", () => {
 	}
 });
 
-function getState() {
+async function getState() {
 	return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
-			if (chrome.runtime.lastError) {
-				console.error('Error getting state:', chrome.runtime.lastError);  // Error log
+			if (!response) {
 				reject(chrome.runtime.lastError);
 			} else {
-				console.log('index received state', response)
-				resolve(response);
+				resolve(response.response)
 			}
 		});
 	});
@@ -36,18 +58,18 @@ function getState() {
 
 function setState(newState) {
 	return new Promise((resolve, reject) => {
-	  chrome.runtime.sendMessage({ type: 'SET_STATE', state: newState }, (response) => {
-		if (chrome.runtime.lastError) {
-			console.error('Error setting state:', chrome.runtime.lastError);  // Error log
-		  reject(chrome.runtime.lastError);
-		} else {
-		  resolve(response);
-		}
-	  });
+		chrome.runtime.sendMessage({ type: 'SET_STATE', state: newState }, (response) => {
+			if (!response) {
+				reject(chrome.runtime.lastError);
+			} else {
+				resolve(response.response)
+			}
+		});
 	});
 }
-  
+
 function startWebcam() {
+	console.log("Starting Webcam")
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
     .then(stream => {
 		webCam.srcObject = stream;
@@ -78,6 +100,7 @@ function startWebcam() {
 }
 
 function stopWebcam() {
+	console.log("Stopping Webcam")
 	stream = webCam.srcObject;
     stream.getTracks().forEach((track) => {
         if (track.readyState == 'live' && track.kind === 'video') {

@@ -14,18 +14,18 @@ let state = {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log('message received in background.js: ', request.type);
     if (request.type === 'GET_STATE') {
         sendResponse({ response: state });
     } else if (request.type === 'SET_STATE') {
         state = { ...state, ...request.state };
-        if (state.isStreamActive == true) {
-            startWebcam();
-        } else {
-            stopWebcam();
-        }
+        // if (state.isStreamActive == true) {
+        //     startWebcam();
+        // } else {
+        //     stopWebcam();
+        // }
         sendResponse({ response: state });
     }
+    return true;
 });
   
 function setState(isActive) {
@@ -33,7 +33,7 @@ function setState(isActive) {
     console.log(`Stream state updated: ${isActive}`);
 }
 
-function startWebcam() {
+async function startWebcam() {
     console.log("background startWebcam");
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
     .then(stream => {
@@ -64,7 +64,7 @@ function startWebcam() {
 }
 
 
-function stopWebcam() {
+async function stopWebcam() {
     console.log("background stopWebcam");
 	// stream = webCam.srcObject;
     // stream.getTracks().forEach((track) => {
