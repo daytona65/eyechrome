@@ -4,8 +4,7 @@ let canvas = document.querySelector("canvas");
 let isStreamActive;
 
 getState().then((response) => {
-	isStreamActive = response.isStreamActive
-	console.log("getState result 1: ", isStreamActive);
+	isStreamActive = response.isStreamActive;
 	if (isStreamActive) {
 		console.log("Fresh start")
 		startWebcam();
@@ -23,25 +22,23 @@ getState().then((response) => {
 document.querySelector("#toggleWebcam").addEventListener("click", () => {
 	getState().then(response => {
 		isStreamActive = response.isStreamActive
-		console.log('getState result 2: ', response.isStreamActive);
+		if (isStreamActive) {
+			stopWebcam();
+			document.querySelector('#toggleWebcam').innerHTML =
+			  'Enable Webcam';
+			document.querySelector('#toggleWebcam').style.border = 
+			'5px solid green';
+	
+		} else {
+			startWebcam();
+			document.querySelector('#toggleWebcam').innerHTML =
+			  'Disable Webcam';
+			document.querySelector('#toggleWebcam').style.border = 
+			'5px solid red';
+		}
 	}).catch(error => {
 		console.error('Error in getting state', error);
 	});
-	console.log("button pressed, stream is: ", isStreamActive);
-	if (isStreamActive) {
-		stopWebcam();
-		document.querySelector('#toggleWebcam').innerHTML =
-      	'Enable Webcam';
-		document.querySelector('#toggleWebcam').style.border = 
-		'5px solid green';
-
-	} else {
-		startWebcam();
-		document.querySelector('#toggleWebcam').innerHTML =
-      	'Disable Webcam';
-		document.querySelector('#toggleWebcam').style.border = 
-		'5px solid red';
-	}
 });
 
 async function getState() {
