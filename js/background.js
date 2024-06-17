@@ -1,15 +1,24 @@
-// Install
-chrome.runtime.onInstalled.addListener(() => {
-    console.log('Extension installed.');
-    // open options
-    chrome.tabs.create({
-        url: '../html/permission.html'
-    })
+// Install and obtain webcam permissions
+console.log("Background is running!");
+chrome.runtime.onInstalled.addListener(({reason}) => {
+    console.log(reason)
+    if (reason === 'install') {
+        chrome.tabs.create({
+            url: '../html/permission.html'
+        })
+        .catch((err) => {
+            console.error("Permissions error:", err);
+            console.error(err.name);
+        });
+    }
+});
+chrome.runtime.onStartup.addListener( () => {
+    console.log(`Background is running!`);
 });
 
-// Tab changes
+// Activate content-script on tab change
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status == 'complete') {
+    if (changeInfo.status === 'complete') {
         chrome.scripting.executeScript({
             files:['js/content-script.js'],
             target: {tabId: tabId}
@@ -23,7 +32,7 @@ chrome.action.onClicked.addListener((tab) => {
     });
 });
 
-// Index.js to content-script.js
+// Send gaze predictions from background to content-script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'scroll') {
       // Get the active tab and send the message to the content script
@@ -36,23 +45,76 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
       });
     }
-  });
+});
 
+// Offscreen document and Webgazer
+chrome.offscreen.createDocument({
+    url: '/background.html',
+    reasons: ['USER_MEDIA', 'DOM_PARSER'],
+    justification: 'To run Webgazer to get gaze coordinates',
+});
 
-// WebGazer
-
-
-// Webcam toggle
 let state = {
     isStreamActive: false
 }
 
+async function startWebgazer() {
+    // await setupOffscreenDocument('background.html');
+    console.log("creating script in background")
+    const script = document.createElement('script');
+    script.id = 'webgazer';
+    script.src = chrome.runtime.getURL('js/webgazer.js');
+    script.type = 'text/javascript';
+    document.body.appendChild(script);
+    script.onload = function() {
+	console.log("Webgazer in background");
+	webgazer.showPredictionPoints(false);
+	webgazer.showVideo(false);
+	webgazer
+	  .setGazeListener(function (data) {
+		if (data == null) {
+		  return;
+		}
+		sendCoordinates(data.x, data.y);
+	  })
+	  .begin();
+    };
+}
+
+async function stopWebgazer() {
+    // await setupOffscreenDocument('background.html');
+    const script = document.getElementById('webgazer')
+    script.remove();
+}
+
+function sendCoordinates(x, y) {
+	console.log("sending");
+	let xNorm = (x + 90) / 500;
+	let yNorm = (y - 300) / 100;
+	console.log(xNorm, yNorm);
+	return new Promise((resolve, reject) => {
+		chrome.runtime.sendMessage({ type: 'scroll', coordinates: { xNorm, yNorm } }, (response) => {
+			if (!response) {
+				reject(chrome.runtime.lastError);
+			} else {
+				resolve(response.response)
+			}
+		});
+	});
+}
+
+// State management
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'GET_STATE') {
         sendResponse({ response: state });
     } else if (request.type === 'SET_STATE') {
         state = { ...state, ...request.state };
         sendResponse({ response: state });
+        if (state.isStreamActive) {
+            startWebgazer();
+        } else {
+            stopWebgazer();
+        }
     }
     return true;
 });
@@ -62,11 +124,14 @@ function setState(isActive) {
     console.log(`Stream state updated: ${isActive}`);
 }
 
-async function startWebcam() {
-    console.log("background startWebcam");
+
+// Start webcam test
+function startWebcam() {
+	console.log("Starting Webcam")
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
     .then(stream => {
-		// webCam.srcObject = stream;
+		webCam.srcObject = stream;
+		setState({ isStreamActive: true });
 		// Capture image frames and perform live-manipulation
 		const mediaStreamTrack = stream.getVideoTracks()[0];
     	let imageCapture = new ImageCapture(mediaStreamTrack);
@@ -92,29 +157,14 @@ async function startWebcam() {
 	});
 }
 
-
-async function stopWebcam() {
-    console.log("background stopWebcam");
-	// stream = webCam.srcObject;
-    // stream.getTracks().forEach((track) => {
-    //     if (track.readyState == 'live' && track.kind === 'video') {
-    //         track.stop();
-    //     }
-    // });
-	// webCam.srcObject = null;
-}
-
-function captureFrames(imageCapture) {
-	const frameGrabber = async () => {
-		imageCapture
-		.grabFrame()
-        .then(imageBitmap => {
-			console.log("Grabbed frame!: ", imageBitmap);
-            canvas.width = imageBitmap.width;
-            canvas.height = imageBitmap.height;
-            canvas.getContext('2d').drawImage(imageBitmap, 0, 0);
-			canvas.classList.remove("hidden"); //unhides the canvas
-        })
-        .catch(error => console.error('grabFrame() error:', error));
-	}
+// TODO: getTracks does not exist in null (stream)
+function stopWebcam() {
+	console.log("Stopping Webcam")
+	stream = webCam.srcObject;
+    stream.getTracks().forEach((track) => {
+        if (track.readyState == 'live' && track.kind === 'video') {
+            track.stop();
+        }
+    });
+	webCam.srcObject = null;
 }

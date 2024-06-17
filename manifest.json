@@ -14,7 +14,8 @@
           "http://*/*", "https://*/*"
         ],
         "js": ["js/content-script.js"],
-        "css": ["js/content-script.css"]
+        "css": ["js/content-script.css"],
+        "run_at": "document_idle"
       }
     ],
     "icons": {
@@ -24,23 +25,25 @@
       "128": "assets/eyelogo.png"
     },
     "background": {
-      "service_worker": "js/background.js",
-      "type": "module"
+      "service_worker": "js/background.js"
     },
     "permissions": [
       "activeTab",
-      "scripting",
-      "storage",
       "tabs",
-      "unlimitedStorage",
-      "background"
+      "scripting",
+      "offscreen",
+      "background",
+      "storage",
+      "unlimitedStorage"
     ],
     "host_permissions": [
-    "*://*/*"
+      "*://*/*",
+      "http://*/*",
+      "https://*/*"
     ],
     "web_accessible_resources": [
     {
-      "resources": ["js/webgazer.js"],
+      "resources": ["js/webgazer.js", "html/permission.html"],
       "matches": ["http://*/*", "https://*/*"]
     }
   ],

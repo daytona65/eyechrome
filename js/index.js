@@ -1,4 +1,3 @@
-
 const webCam = document.getElementById("webcam");
 let canvas = document.querySelector("canvas");
 let isStreamActive;
@@ -6,13 +5,12 @@ let isStreamActive;
 const script = document.createElement('script');
 script.src = chrome.runtime.getURL('js/webgazer.js');
 script.type = 'text/javascript'
-document.body.appendChild(script);
-console.log("window popup: ", window.innerWidth);
+// document.body.appendChild(script);
 
 script.onload = function() {
 	console.log("WEBGAZER LOADED");
-	webgazer.showPredictionPoints(true);
-	webgazer.showVideo(true);
+	webgazer.showPredictionPoints(false);
+	webgazer.showVideo(false);
 	webgazer
 	  .setGazeListener(function (data) {
 		if (data == null) {
@@ -21,22 +19,22 @@ script.onload = function() {
 		sendCoordinates(data.x, data.y);
 	  })
 	  .begin();
-  };
+};
   
 
-getState().then((response) => {
-	isStreamActive = response.isStreamActive;
-	if (isStreamActive) {
-		console.log("Fresh start")
-		startWebcam();
-		document.querySelector('#toggleWebcam').innerHTML =
-		  'Disable Webcam';
-		document.querySelector('#toggleWebcam').style.border = 
-		'5px solid red';
-	}
-}).catch(error => {
-	console.error('Error in getting state', error);
-});
+// getState().then((response) => {
+// 	isStreamActive = response.isStreamActive;
+// 	if (isStreamActive) {
+// 		console.log("Fresh start")
+// 		startWebcam();
+// 		document.querySelector('#toggleWebcam').innerHTML =
+// 		  'Disable Webcam';
+// 		document.querySelector('#toggleWebcam').style.border = 
+// 		'5px solid red';
+// 	}
+// }).catch(error => {
+// 	console.error('Error in getting state', error);
+// });
 
 
 
@@ -44,14 +42,16 @@ document.querySelector("#toggleWebcam").addEventListener("click", () => {
 	getState().then(response => {
 		isStreamActive = response.isStreamActive
 		if (isStreamActive) {
-			stopWebcam();
+			setState({ isStreamActive: false });
+			// stopWebcam();
 			document.querySelector('#toggleWebcam').innerHTML =
 			  'Enable Webcam';
 			document.querySelector('#toggleWebcam').style.border = 
 			'5px solid green';
 	
 		} else {
-			startWebcam();
+			setState({ isStreamActive: true });
+			// startWebcam();
 			document.querySelector('#toggleWebcam').innerHTML =
 			  'Disable Webcam';
 			document.querySelector('#toggleWebcam').style.border = 
@@ -76,11 +76,9 @@ function getState() {
 
 function sendCoordinates(x, y) {
 	console.log("sending");
-	
 	let xNorm = (x + 90) / 500;
 	let yNorm = (y - 300) / 100;
 	console.log(xNorm, yNorm);
-
 	return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage({ type: 'scroll', coordinates: { xNorm, yNorm } }, (response) => {
 			if (!response) {
