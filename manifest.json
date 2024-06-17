@@ -13,7 +13,8 @@
         "matches": [
           "http://*/*", "https://*/*"
         ],
-        "js": ["js/content.js"]
+        "js": ["js/content-script.js"],
+        "css": ["js/content-script.css"]
       }
     ],
     "icons": {
@@ -23,13 +24,27 @@
       "128": "assets/eyelogo.png"
     },
     "background": {
-      "service_worker": "js/background.js"
+      "service_worker": "js/background.js",
+      "type": "module"
     },
     "permissions": [
       "activeTab",
+      "scripting",
       "storage",
       "tabs",
       "unlimitedStorage",
       "background"
-    ]
+    ],
+    "host_permissions": [
+    "*://*/*"
+    ],
+    "web_accessible_resources": [
+    {
+      "resources": ["js/webgazer.js"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 }

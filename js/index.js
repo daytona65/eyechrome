@@ -2,6 +2,27 @@
 const webCam = document.getElementById("webcam");
 let canvas = document.querySelector("canvas");
 let isStreamActive;
+// Webgazer
+const script = document.createElement('script');
+script.src = chrome.runtime.getURL('js/webgazer.js');
+script.type = 'text/javascript'
+document.body.appendChild(script);
+console.log("window popup: ", window.innerWidth);
+
+script.onload = function() {
+	console.log("WEBGAZER LOADED");
+	webgazer.showPredictionPoints(true);
+	webgazer.showVideo(true);
+	webgazer
+	  .setGazeListener(function (data) {
+		if (data == null) {
+		  return;
+		}
+		sendCoordinates(data.x, data.y);
+	  })
+	  .begin();
+  };
+  
 
 getState().then((response) => {
 	isStreamActive = response.isStreamActive;
@@ -44,6 +65,24 @@ document.querySelector("#toggleWebcam").addEventListener("click", () => {
 function getState() {
 	return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
+			if (!response) {
+				reject(chrome.runtime.lastError);
+			} else {
+				resolve(response.response)
+			}
+		});
+	});
+}
+
+function sendCoordinates(x, y) {
+	console.log("sending");
+	
+	let xNorm = (x + 90) / 500;
+	let yNorm = (y - 300) / 100;
+	console.log(xNorm, yNorm);
+
+	return new Promise((resolve, reject) => {
+		chrome.runtime.sendMessage({ type: 'scroll', coordinates: { xNorm, yNorm } }, (response) => {
 			if (!response) {
 				reject(chrome.runtime.lastError);
 			} else {
@@ -108,24 +147,6 @@ function stopWebcam() {
 	webCam.srcObject = null;
 	setState({ isStreamActive: false });
 }
-
-// WebGazer
-const script = document.createElement('script');
-script.src = chrome.runtime.getURL('webgazer.js');
-script.onload = function() {
-	script.remove();
-
-	// Start WebGazer
-	webgazer.setRegression('ridge')
-			.setGazeListener((data, elapsedTime) => {
-				if (data == null) {
-				return;
-				}
-				const xPrediction = data.x;
-				const yPrediction = data.y;
-				console.log(`x: ${xPrediction}, y: ${yPrediction}`);
-			}).begin();
-};
 
 // Framecapture
 function captureFrames(imageCapture) {
