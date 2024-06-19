@@ -11,6 +11,7 @@ script.onload = function() {
 	console.log("WEBGAZER LOADED");
 	webgazer.showPredictionPoints(true);
 	webgazer.showVideo(true);
+	webgazer.setRegression("ridge");
 	webgazer
 	  .setGazeListener(function (data) {
 		if (data == null) {
@@ -77,8 +78,8 @@ function getState() {
 function sendCoordinates(x, y) {
 	console.log("sending");
 	let xNorm = (x + 90) / 500;
-	let yNorm = (y - 300) / 100;
-	console.log(xNorm, yNorm);
+	let yNorm = (y - 200) / 50;
+	console.log(x, y);
 	return new Promise((resolve, reject) => {
 		chrome.runtime.sendMessage({ type: 'scroll', coordinates: { xNorm, yNorm } }, (response) => {
 			if (!response) {

@@ -15,7 +15,7 @@ chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
       predY: yNorm,
     });
   
-    if (allData.length > 10) {
+    if (allData.length > 15) {
       allData.shift();
     }
   
@@ -36,13 +36,13 @@ chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
       "position:fixed;width:20px;height:20px;border-radius:50%;background-color: red;border:0.5px solid black;";
       document.body.appendChild(point);
     }
-    point.style.left = avgX * 100 + "%";
+    point.style.left = avgX * 50 + "%";
     point.style.top = avgY * 100 + "%";
     console.log(avgY);
-    if (avgY > 1.2) {
+    if (avgY < -2) {
       window.scrollBy(0, 2);
     }
-    if (avgY < 0.001) {
+    if (avgY > 0.1) {
       window.scrollBy(0, -2);
     }
   }
