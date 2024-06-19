@@ -5,12 +5,12 @@ let isStreamActive;
 const script = document.createElement('script');
 script.src = chrome.runtime.getURL('js/webgazer.js');
 script.type = 'text/javascript'
-// document.body.appendChild(script);
+document.body.appendChild(script);
 
 script.onload = function() {
 	console.log("WEBGAZER LOADED");
-	webgazer.showPredictionPoints(false);
-	webgazer.showVideo(false);
+	webgazer.showPredictionPoints(true);
+	webgazer.showVideo(true);
 	webgazer
 	  .setGazeListener(function (data) {
 		if (data == null) {
