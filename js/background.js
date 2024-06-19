@@ -25,6 +25,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         });
     }
 });
+
 chrome.action.onClicked.addListener((tab) => {
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
@@ -32,8 +33,8 @@ chrome.action.onClicked.addListener((tab) => {
     });
 });
 
-// Send gaze predictions from background to content-script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+// Send gaze predictions from offscreen to content-script
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.type === 'scroll') {
       // Get the active tab and send the message to the content script
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -48,52 +49,49 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Offscreen document and Webgazer
-chrome.offscreen.createDocument({
-    url: '/background.html',
-    reasons: ['USER_MEDIA', 'DOM_PARSER'],
-    justification: 'To run Webgazer to get gaze coordinates',
-});
-
-let state = {
-    isStreamActive: false
+const OFFSCREEN_DOCUMENT_PATH = 'html/offscreen.html';
+async function setupOffscreenDocument() {
+    try {
+        await chrome.offscreen.createDocument({
+            url: OFFSCREEN_DOCUMENT_PATH,
+            reasons: ['USER_MEDIA', 'DOM_PARSER'],
+            justification: 'To run Webgazer to get gaze coordinates',
+        });
+    } catch (error) {
+        if (!error.message.startsWith('Only a single offscreen'))
+          throw error;
+    }
+    console.log("Has offscreen been created?", await hasDocument());
 }
 
-async function startWebgazer() {
-    // await setupOffscreenDocument('background.html');
-    console.log("creating script in background")
-    const script = document.createElement('script');
-    script.id = 'webgazer';
-    script.src = chrome.runtime.getURL('js/webgazer.js');
-    script.type = 'text/javascript';
-    document.body.appendChild(script);
-    script.onload = function() {
-	console.log("Webgazer in background");
-	webgazer.showPredictionPoints(false);
-	webgazer.showVideo(false);
-	webgazer
-	  .setGazeListener(function (data) {
-		if (data == null) {
-		  return;
-		}
-		sendCoordinates(data.x, data.y);
-	  })
-	  .begin();
-    };
+async function hasDocument() {
+    // Check all windows controlled by the service worker if one of them is the offscreen document
+    const matchedClients = await clients.matchAll();
+    for (const client of matchedClients) {
+      if (client.url.endsWith(OFFSCREEN_DOCUMENT_PATH)) {
+        return true;
+      }
+    }
+    return false;
 }
 
-async function stopWebgazer() {
-    // await setupOffscreenDocument('background.html');
-    const script = document.getElementById('webgazer')
-    script.remove();
+async function startOffscreenWebgazer() {
+    await setupOffscreenDocument();
+    return new Promise((resolve, reject) => {
+		chrome.runtime.sendMessage({ type: 'startWebgazer' }, (response) => {
+			if (!response) {
+				reject(chrome.runtime.lastError);
+			} else {
+				resolve(response.response)
+			}
+		});
+	});
 }
 
-function sendCoordinates(x, y) {
-	console.log("sending");
-	let xNorm = (x + 90) / 500;
-	let yNorm = (y - 300) / 100;
-	console.log(xNorm, yNorm);
-	return new Promise((resolve, reject) => {
-		chrome.runtime.sendMessage({ type: 'scroll', coordinates: { xNorm, yNorm } }, (response) => {
+async function stopOffscreenWebgazer() {
+    await chrome.offscreen.closeDocument();
+    return new Promise((resolve, reject) => {
+		chrome.runtime.sendMessage({ type: 'stopWebgazer' }, (response) => {
 			if (!response) {
 				reject(chrome.runtime.lastError);
 			} else {
@@ -104,16 +102,19 @@ function sendCoordinates(x, y) {
 }
 
 // State management
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+let state = {
+    isStreamActive: false
+}
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.type === 'GET_STATE') {
         sendResponse({ response: state });
     } else if (request.type === 'SET_STATE') {
         state = { ...state, ...request.state };
         sendResponse({ response: state });
         if (state.isStreamActive) {
-            startWebgazer();
+            startOffscreenWebgazer();
         } else {
-            stopWebgazer();
+            stopOffscreenWebgazer();
         }
     }
     return true;
@@ -122,49 +123,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function setState(isActive) {
     state.isStreamActive = isActive;
     console.log(`Stream state updated: ${isActive}`);
-}
-
-
-// Start webcam test
-function startWebcam() {
-	console.log("Starting Webcam")
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-    .then(stream => {
-		webCam.srcObject = stream;
-		setState({ isStreamActive: true });
-		// Capture image frames and perform live-manipulation
-		const mediaStreamTrack = stream.getVideoTracks()[0];
-    	let imageCapture = new ImageCapture(mediaStreamTrack);
-		captureFrames(imageCapture);
-    })
-    .catch((err) => {
-		console.error("getUserMedia() error:", err);
-		let errorMessage = "An error occurred: ";
-		switch (err.name) {
-		case "NotAllowedError":
-			errorMessage += "Permission to access camera was denied.";
-			break;
-		case "NotFoundError":
-			errorMessage += "No camera device found.";
-			break;
-		case "NotReadableError":
-			errorMessage += "Camera is already in use by another application.";
-			break;
-		default:
-			errorMessage += err.message;
-		}
-		document.getElementById("error").textContent = errorMessage;
-	});
-}
-
-// TODO: getTracks does not exist in null (stream)
-function stopWebcam() {
-	console.log("Stopping Webcam")
-	stream = webCam.srcObject;
-    stream.getTracks().forEach((track) => {
-        if (track.readyState == 'live' && track.kind === 'video') {
-            track.stop();
-        }
-    });
-	webCam.srcObject = null;
 }

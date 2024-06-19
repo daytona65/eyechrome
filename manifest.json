@@ -30,6 +30,7 @@
     "permissions": [
       "activeTab",
       "tabs",
+      "userScripts",
       "scripting",
       "offscreen",
       "background",

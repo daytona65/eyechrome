@@ -1,14 +1,11 @@
 // Inject WebGazer.js
-// Content logging is in website console
 console.log("content script is running");
-const script = document.createElement('script');
-script.src = chrome.runtime.getURL('js/webgazer.js');
-script.type = 'text/javascript'
-console.log("window content-script: ", window.innerWidth); //1536 x 730
 let allData = []
+
 // Receive coordinates and execute scrolling on window
-chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
   if (data.type = 'scroll') {
+    console.log("Data received", data.coordinates)
     var { xNorm, yNorm } = data.coordinates
     allData.push({
       predX: xNorm,
