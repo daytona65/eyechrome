@@ -1,9 +1,11 @@
 body {
-    width: 800px;
-    height: 300px;
+    width: 100px;
+    height: 100px;
     align-items: center;
     display: flex;
     flex-direction: column;
+    background-color: bisque;
+    border-radius: 200px;
 }
 
 video {
@@ -12,10 +14,6 @@ video {
     display: flex;
     position: relative;
     border: 1px solid black;  
-}
-
-canvas {
-    position: absolute;
 }
 
 #toggleWebcam {
@@ -37,9 +35,6 @@ canvas {
     justify-content: center;
     width: 290px;
     position: relative;
-}
-
-.title {
 }
 
 #permission {
