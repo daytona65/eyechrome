@@ -1,7 +1,7 @@
 
 // Listeners
 console.log("Offscreen is running!");
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'startWebgazer') {
       startWebgazer();
     } else if (message.type === 'stopWebgazer' ) {
@@ -23,9 +23,7 @@ async function startWebgazer() {
         webgazer.showVideo(false);
         webgazer
             .setGazeListener(function (data) {
-                console.log("listening")
                 if (data == null) {
-                    console.log("nullinggggggg")
                     return;
                 }
                 sendCoordinates(data.x, data.y);

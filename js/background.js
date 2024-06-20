@@ -26,12 +26,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }
 });
 
-chrome.action.onClicked.addListener((tab) => {
-    chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ["js/content-script.js"]
-    });
-});
+// chrome.action.onClicked.addListener((tab) => {
+//     chrome.scripting.executeScript({
+//         target: { tabId: tab.id },
+//         files: ["js/content-script.js"]
+//     });
+// });
 
 // Send gaze predictions from offscreen to content-script
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -90,15 +90,7 @@ async function startOffscreenWebgazer() {
 
 async function stopOffscreenWebgazer() {
     await chrome.offscreen.closeDocument();
-    return new Promise((resolve, reject) => {
-		chrome.runtime.sendMessage({ type: 'stopWebgazer' }, (response) => {
-			if (!response) {
-				reject(chrome.runtime.lastError);
-			} else {
-				resolve(response.response)
-			}
-		});
-	});
+    console.log("stopOffscreenWebgazer");
 }
 
 // State management

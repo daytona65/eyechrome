@@ -3,7 +3,7 @@ console.log("content script is running");
 let allData = []
 
 // Receive coordinates and execute scrolling on window
-chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
   if (data.type = 'scroll') {
     console.log("Data received", data.coordinates)
     var { xNorm, yNorm } = data.coordinates
@@ -43,5 +43,5 @@ chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
       window.scrollBy(0, -2);
     }
   }
-  return true;
+  sendResponse({ response: 'received' })
 });
