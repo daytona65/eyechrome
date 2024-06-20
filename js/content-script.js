@@ -43,5 +43,5 @@ chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
       window.scrollBy(0, -2);
     }
   }
-  sendResponse({ response: 'received' })
+  sendResponse({ response: 'Coordinates received' })
 });

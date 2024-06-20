@@ -1,5 +1,5 @@
 // Install and obtain webcam permissions
-console.log("Background is running!");
+console.log(`Background is running!`);
 chrome.runtime.onInstalled.addListener(({reason}) => {
     console.log(reason)
     if (reason === 'install') {
@@ -11,9 +11,6 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
             console.error(err.name);
         });
     }
-});
-chrome.runtime.onStartup.addListener( () => {
-    console.log(`Background is running!`);
 });
 
 // Activate content-script on tab change
@@ -77,15 +74,16 @@ async function hasDocument() {
 
 async function startOffscreenWebgazer() {
     await setupOffscreenDocument();
-    return new Promise((resolve, reject) => {
-		chrome.runtime.sendMessage({ type: 'startWebgazer' }, (response) => {
-			if (!response) {
-				reject(chrome.runtime.lastError);
-			} else {
-				resolve(response.response)
-			}
-		});
-	});
+    // return new Promise((resolve, reject) => {
+	// 	chrome.runtime.sendMessage({ type: 'startWebgazer' }, (response) => {
+	// 		console.log("startOffscreenPromise", response);
+    //         if (!response) {
+	// 			reject(chrome.runtime.lastError);
+	// 		} else {
+	// 			resolve(response.response);
+	// 		}
+    //     });
+	// });
 }
 
 async function stopOffscreenWebgazer() {
