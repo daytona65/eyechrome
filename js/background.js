@@ -23,26 +23,23 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }
 });
 
-// chrome.action.onClicked.addListener((tab) => {
-//     chrome.scripting.executeScript({
-//         target: { tabId: tab.id },
-//         files: ["js/content-script.js"]
-//     });
-// });
-
 // Send gaze predictions from offscreen to content-script
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.type === 'scroll') {
+        console.log("scroll received from offscreen");
       // Get the active tab and send the message to the content script
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             type: 'scroll',
             coordinates: message.coordinates
+          }, (response) => {
+            sendResponse(response);
           });
         }
       });
     }
+    return true;
 });
 
 // Offscreen document and Webgazer
@@ -74,16 +71,6 @@ async function hasDocument() {
 
 async function startOffscreenWebgazer() {
     await setupOffscreenDocument();
-    // return new Promise((resolve, reject) => {
-	// 	chrome.runtime.sendMessage({ type: 'startWebgazer' }, (response) => {
-	// 		console.log("startOffscreenPromise", response);
-    //         if (!response) {
-	// 			reject(chrome.runtime.lastError);
-	// 		} else {
-	// 			resolve(response.response);
-	// 		}
-    //     });
-	// });
 }
 
 async function stopOffscreenWebgazer() {
