@@ -9,13 +9,14 @@ document.body.appendChild(script);
 
 script.onload = function() {
 	console.log("WEBGAZER LOADED");
-	webgazer.showPredictionPoints(true);
-	webgazer.showVideo(true);
+	webgazer.showPredictionPoints(false);
+	webgazer.showVideo(false);
 	webgazer.setRegression("ridge");
 	webgazer
 	  .setGazeListener(function (data) {
 		if (data == null) {
-		  return;
+			console.log("Webgazer data null");
+		  	return;
 		}
 		sendCoordinates(data.x, data.y);
 	  })
