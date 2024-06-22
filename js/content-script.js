@@ -41,7 +41,7 @@ function calibrate(x, y) {
       `;
     calibratePoint.innerHTML = "LOOK HERE"
     var left = (window.innerWidth - calibratePoint.offsetWidth) / 2;
-    var top = (window.innerHeight - calibratePoint.offsetHeight) / 1.5;
+    var top = (window.innerHeight - calibratePoint.offsetHeight) / 1.75;
     calibratePoint.style.left = `${left}px`;
     calibratePoint.style.top = `${top}px`;
     document.body.appendChild(calibratePoint);
@@ -116,12 +116,13 @@ function scroll(x, y) {
   point.style.top = `${avgY}px`;
 
   let scale = 1
-  let deviation = centre.y - y
+  let deviation = (centre.y - y)*1.3
+  if (deviation > 0) {
+    deviation *= 1.1
+  }
   let scrollDistance = 1 / (1 + Math.exp(-deviation / scale))
   if (Math.abs(deviation) > 10) {
-    if (deviation > 0) {
-      deviation *= 1.1
-    }
+    console.log(deviation)
     window.scrollBy({
       top: deviation,
       left: 0,
