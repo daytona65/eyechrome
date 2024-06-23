@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "eyechrome",
-    "description": "gesture control with eyes and hands, using your webcam",
+    "description": "Navigate websites with your eyes!",
     "version": "1.0",
     "options_page": "html/options.html",
     "action": {
@@ -11,9 +11,11 @@
     "content_scripts": [
       {
         "matches": [
-          "<all_urls>"
+          "http://*/*", "https://*/*"
         ],
-        "js": ["scripts/content.js"]
+        "js": ["js/content-script.js"],
+        "css": ["js/content-script.css"],
+        "run_at": "document_idle"
       }
     ],
     "icons": {
@@ -23,12 +25,30 @@
       "128": "assets/eyelogo.png"
     },
     "background": {
-      "service_worker": "scripts/background.js"
+      "service_worker": "js/background.js"
     },
     "permissions": [
       "activeTab",
+      "tabs",
+      "userScripts",
+      "scripting",
+      "offscreen",
+      "background",
       "storage",
-      "unlimitedStorage",
-      "background"
-    ]
+      "unlimitedStorage"
+    ],
+    "host_permissions": [
+      "*://*/*",
+      "http://*/*",
+      "https://*/*"
+    ],
+    "web_accessible_resources": [
+    {
+      "resources": ["js/webgazer.js", "html/permission.html", "html/offscreen.html"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 }
