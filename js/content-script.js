@@ -1,5 +1,4 @@
 // Inject WebGazer.js
-console.log("content script is running");
 let allData = []
 let calibrationData = []
 let centre;
@@ -123,7 +122,6 @@ function scroll(x, y) {
   }
   let scrollDistance = 1 / (1 + Math.exp(-deviation / scale))
   if (Math.abs(deviation) > 5) {
-    console.log(deviation)
     window.scrollBy({
       top: deviation,
       left: 0,

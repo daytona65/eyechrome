@@ -1,7 +1,5 @@
 // Install and obtain webcam permissions
-console.log(`Background is running!`);
 chrome.runtime.onInstalled.addListener(({reason}) => {
-    console.log(reason)
     if (reason === 'install') {
         chrome.tabs.create({
             url: '../html/permission.html'
@@ -26,7 +24,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // Send gaze predictions from offscreen to content-script
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.type === 'scroll') {
-        console.log("scroll received from offscreen");
       // Get the active tab and send the message to the content script
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]) {
@@ -55,7 +52,6 @@ async function setupOffscreenDocument() {
         if (!error.message.startsWith('Only a single offscreen'))
           throw error;
     }
-    console.log("Has offscreen been created?", await hasDocument());
 }
 
 async function hasDocument() {
@@ -75,7 +71,6 @@ async function startOffscreenWebgazer() {
 
 async function stopOffscreenWebgazer() {
     await chrome.offscreen.closeDocument();
-    console.log("stopOffscreenWebgazer");
 }
 
 // State management
@@ -99,5 +94,4 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   
 function setState(isActive) {
     state.isStreamActive = isActive;
-    console.log(`Stream state updated: ${isActive}`);
 }

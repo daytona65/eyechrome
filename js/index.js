@@ -52,7 +52,6 @@ function setState(newState) {
 			if (!response) {
 				reject(chrome.runtime.lastError);
 			} else {
-				console.log("Setting state: ", newState.state);
 				resolve(response.response)
 			}
 		});
