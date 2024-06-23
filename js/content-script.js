@@ -121,21 +121,13 @@ function scroll(x, y) {
     deviation *= 1.1
   }
   let scrollDistance = 1 / (1 + Math.exp(-deviation / scale))
-  if (Math.abs(deviation) > 10) {
+  if (Math.abs(deviation) > 6) {
     console.log(deviation)
     window.scrollBy({
       top: deviation,
       left: 0,
       behavior: "smooth",
     });
-    // let direction = deviation > 0 ? 1 : -1;
-    // for (let i = 0; i < Math.abs(deviation); i++) {
-    //   window.scrollBy({
-    //     top: direction,
-    //     left: 0,
-    //     behavior: "smooth",
-    //   });
-    // }
   }
 }
 
