@@ -5,8 +5,8 @@ let isStreamActive;
 const script = document.createElement('script');
 script.src = chrome.runtime.getURL('js/webgazer.js');
 script.type = 'text/javascript'
-document.body.appendChild(script);
-
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+let notTriggered = true;
 script.onload = function() {
 	console.log("WEBGAZER LOADED");
 	webgazer.showPredictionPoints(false);
@@ -14,15 +14,31 @@ script.onload = function() {
 	webgazer.setRegression("ridge");
 	webgazer
 	  .setGazeListener(function (data) {
-		if (data == null) {
+		if (notTriggered) {
+			triggerDispatch();
+		}
+		if (data == null || isNaN(data.x)) {
 			console.log("Webgazer data null");
+			// triggerDispatch();
 		  	return;
 		}
 		sendCoordinates(data.x, data.y);
 	  })
 	  .begin();
 };
-  
+document.body.appendChild(script);
+
+
+async function triggerDispatch() {
+	notTriggered = false;
+	await sleep (5000);
+	document.querySelector("#toggleWebcam").dispatchEvent(
+		new MouseEvent('click', {
+			view: window,
+			bubbles: true,
+			cancelable: true
+		}));
+}
 
 // getState().then((response) => {
 // 	isStreamActive = response.isStreamActive;
@@ -41,27 +57,28 @@ script.onload = function() {
 
 
 document.querySelector("#toggleWebcam").addEventListener("click", () => {
-	getState().then(response => {
-		isStreamActive = response.isStreamActive
-		if (isStreamActive) {
-			setState({ isStreamActive: false });
-			// stopWebcam();
-			document.querySelector('#toggleWebcam').innerHTML =
-			  'Enable Webcam';
-			document.querySelector('#toggleWebcam').style.border = 
-			'5px solid green';
+	console.log('clicked');
+	// getState().then(response => {
+	// 	isStreamActive = response.isStreamActive
+	// 	if (isStreamActive) {
+	// 		// setState({ isStreamActive: false });
+	// 		// stopWebcam();
+	// 		document.querySelector('#toggleWebcam').innerHTML =
+	// 		  'Enable Webcam';
+	// 		document.querySelector('#toggleWebcam').style.border = 
+	// 		'5px solid green';
 	
-		} else {
-			setState({ isStreamActive: true });
-			// startWebcam();
-			document.querySelector('#toggleWebcam').innerHTML =
-			  'Disable Webcam';
-			document.querySelector('#toggleWebcam').style.border = 
-			'5px solid red';
-		}
-	}).catch(error => {
-		console.error('Error in getting state', error);
-	});
+	// 	} else {
+	// 		// setState({ isStreamActive: true });
+	// 		// startWebcam();
+	// 		document.querySelector('#toggleWebcam').innerHTML =
+	// 		  'Disable Webcam';
+	// 		document.querySelector('#toggleWebcam').style.border = 
+	// 		'5px solid red';
+	// 	}
+	// }).catch(error => {
+	// 	console.error('Error in getting state', error);
+	// });
 });
 
 function getState() {
