@@ -1,8 +1,12 @@
 // Inject WebGazer.js
-let allData = []
-let calibrationData = []
+if (typeof allData === 'undefined') {
+  var allData = [];
+}
+if (typeof calibrationData === 'undefined') {
+  var calibrationData = [];
+}
 let centre;
-let calibrationBuffer = 0
+let calibrationBuffer = 0;
 let calibrated = false;
 
 // Receive coordinates and execute scrolling on window
@@ -118,7 +122,7 @@ function scroll(x, y) {
   let scale = 1
   let deviation = centre.y - avgY
   if (deviation > 0) {
-    deviation *= 1.5
+    deviation *= 1.8
   }
   let scrollDistance = 1 / (1 + Math.exp(-deviation / scale))
   if (Math.abs(deviation) > 5) {
