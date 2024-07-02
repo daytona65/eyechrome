@@ -31,7 +31,11 @@
       "activeTab",
       "scripting",
       "offscreen",
-      "background"
+      "background",
+      "tabs",
+      "userScripts",
+      "storage",
+      "unlimitedStorage"
     ],
     "host_permissions": [
       "*://*/*",
