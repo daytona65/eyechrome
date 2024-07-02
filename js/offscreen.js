@@ -2,6 +2,7 @@
 const script = document.createElement('script');
 script.src = chrome.runtime.getURL('js/webgazer.js');
 script.type = 'text/javascript';
+script.id = 'webgazer';
 document.body.appendChild(script);
 script.onload = function() {
     webgazer.showPredictionPoints(false);

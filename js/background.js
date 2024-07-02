@@ -1,15 +1,15 @@
 // Install and obtain webcam permissions
-chrome.runtime.onInstalled.addListener(({reason}) => {
-    if (reason === 'install') {
-        chrome.tabs.create({
-            url: '../html/permission.html'
-        })
-        .catch((err) => {
-            console.error("Permissions error:", err);
-            console.error(err.name);
-        });
-    }
-});
+// chrome.runtime.onInstalled.addListener(({reason}) => {
+//     if (reason === 'install') {
+//         chrome.tabs.create({
+//             url: '../html/permission.html'
+//         })
+//         .catch((err) => {
+//             console.error("Permissions error:", err);
+//             console.error(err.name);
+//         });
+//     }
+// });
 
 // Activate content-script on tab change
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -75,7 +75,8 @@ async function stopOffscreenWebgazer() {
 
 // State management
 let state = {
-    isStreamActive: false
+    isStreamActive: false,
+    isWebgazerActive: false
 }
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.type === 'GET_STATE') {
@@ -83,9 +84,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     } else if (request.type === 'SET_STATE') {
         state = { ...state, ...request.state };
         sendResponse({ response: state });
-        if (state.isStreamActive) {
+        if (state.isStreamActive && state.isWebgazerActive) {
             startOffscreenWebgazer();
-        } else {
+        } else if (state.isWebgazerActive) {
             stopOffscreenWebgazer();
         }
     }
