@@ -93,13 +93,15 @@ async function loadingButton() {
 	document.querySelector('#toggleWebcam').style.border = 
 	'5px solid black';
 	document.querySelector('#toggleWebcam').innerHTML =
-	'Click to start';
+	'Loading...';
 }
 
 function enableLoadingButton() {
 	document.querySelector('#toggleWebcam').style.border = 
 	'5px solid green';
 	document.querySelector("#toggleWebcam").disabled = false;
+	document.querySelector('#toggleWebcam').innerHTML =
+	'Click to Load Model';
 }
 
 function stopAllVideoStreams() {

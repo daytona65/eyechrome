@@ -1,15 +1,15 @@
 // Install and obtain webcam permissions
-// chrome.runtime.onInstalled.addListener(({reason}) => {
-//     if (reason === 'install') {
-//         chrome.tabs.create({
-//             url: '../html/permission.html'
-//         })
-//         .catch((err) => {
-//             console.error("Permissions error:", err);
-//             console.error(err.name);
-//         });
-//     }
-// });
+chrome.runtime.onInstalled.addListener(({reason}) => {
+    if (reason === 'install') {
+        chrome.tabs.create({
+            url: '../html/permission.html'
+        })
+        .catch((err) => {
+            console.error("Permissions error:", err);
+            console.error(err.name);
+        });
+    }
+});
 
 // Activate content-script on tab change
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {

@@ -43,12 +43,15 @@ function calibrate(x, y) {
       justify-content: center;
       text-align: center;
       `;
-    calibratePoint.innerHTML = "LOOK HERE"
+    calibratePoint.innerHTML = "LOOK HERE";
     var left = (window.innerWidth - calibratePoint.offsetWidth) / 2.1;
-    var top = (window.innerHeight - calibratePoint.offsetHeight) / 1.6;
+    var top = (window.innerHeight - calibratePoint.offsetHeight) / 1.4;
     calibratePoint.style.left = `${left}px`;
     calibratePoint.style.top = `${top}px`;
     document.body.appendChild(calibratePoint);
+    // Clearing data arrays
+    allData.length = 0;
+    calibrationData.length = 0;
   } else {
     if (calibratePoint.style.background == 'yellow') {
       calibratePoint.style.background = 'red';
