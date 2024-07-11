@@ -1,13 +1,20 @@
-// Inject WebGazer.js
 if (typeof allData === 'undefined') {
   var allData = [];
-}
-if (typeof calibrationData === 'undefined') {
   var calibrationData = [];
+  let centre;
+  let calibrated = false;
+  let bufferCalibration;
 }
-let centre;
-let calibrationBuffer = 0;
-let calibrated = false;
+
+// Reset calibration with each website
+allData.length = 0;
+calibrationData.length = 0;
+calibrated = false;
+bufferCalibration = 100;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // Receive coordinates and execute scrolling on window
 chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
@@ -24,7 +31,7 @@ chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
   }
 });
 
-function calibrate(x, y) {
+async function calibrate(x, y) {
   let calibratePoint = document.getElementById("calibratePoint");
   if (calibratePoint == undefined) {
     calibratePoint = document.createElement("div");
@@ -45,13 +52,10 @@ function calibrate(x, y) {
       `;
     calibratePoint.innerHTML = "LOOK HERE";
     var left = (window.innerWidth - calibratePoint.offsetWidth) / 2.1;
-    var top = (window.innerHeight - calibratePoint.offsetHeight) / 1.4;
+    var top = (window.innerHeight - calibratePoint.offsetHeight) / 1.6;
     calibratePoint.style.left = `${left}px`;
     calibratePoint.style.top = `${top}px`;
     document.body.appendChild(calibratePoint);
-    // Clearing data arrays
-    allData.length = 0;
-    calibrationData.length = 0;
   } else {
     if (calibratePoint.style.background == 'yellow') {
       calibratePoint.style.background = 'red';
@@ -61,8 +65,10 @@ function calibrate(x, y) {
       calibratePoint.style.color = 'black';
     }
   }
-  if (calibrationBuffer >= 30) {
-    if (calibrationData.length < 20) {
+  if (bufferCalibration > 0) { // Do not ingest inaccurate x y
+    bufferCalibration -= 1;
+  } else {
+    if (calibrationData.length < 50) {
       calibrationData.push({
         x: x,
         y: y,
@@ -78,12 +84,11 @@ function calibrate(x, y) {
         accumulator.y += currentValue.y;
         return accumulator;
       }, { x: 0, y: 0 });
+      console.log("CALIBRATED");
       centre = { x: centre.x / calibrationData.length, y: centre.y / calibrationData.length };
-      console.log("CALIBRATED! ", centre.y);
     }
-  } else {
-    calibrationBuffer += 1;
   }
+    
 }
 
 function scroll(x, y) {
@@ -122,15 +127,17 @@ function scroll(x, y) {
   point.style.left = `${avgX}px`;
   point.style.top = `${avgY}px`;
 
-  let scale = 1
+  let dpr = window.devicePixelRatio;
+  let staticViewPort = window.innerHeight / 100 * dpr;
   let deviation = centre.y - avgY
   if (deviation > 0) {
-    deviation *= 1.8
+    deviation *= 1.1
   }
-  let scrollDistance = 1 / (1 + Math.exp(-deviation / scale))
-  if (Math.abs(deviation) > 5) {
+  console.log(staticViewPort);
+  console.log(centre.y);
+  if (Math.abs(deviation) > staticViewPort) {
     window.scrollBy({
-      top: deviation,
+      top: deviation < 0 ? deviation + staticViewPort : deviation - staticViewPort,
       left: 0,
       behavior: "smooth",
     });
