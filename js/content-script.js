@@ -19,9 +19,9 @@ chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
     } else {
       calibrate(x, y);
     }
+    sendResponse({ response: 'Coordinates received' });
+    return true;
   }
-  sendResponse({ response: 'Coordinates received' })
-  return true;
 });
 
 function calibrate(x, y) {

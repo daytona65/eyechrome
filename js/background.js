@@ -31,10 +31,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
             type: 'scroll',
             coordinates: message.coordinates
           }, (response) => {
-            sendResponse(response);
           });
         }
       });
+      sendResponse({ response: 'Background to offscreen received' });
     }
     return true;
 });

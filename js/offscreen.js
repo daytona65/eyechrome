@@ -8,10 +8,6 @@ script.onload = function() {
     webgazer.showPredictionPoints(false);
     webgazer.showVideo(false);
 	webgazer.setRegression("ridge");
-	gazeListener();
-};
-
-function gazeListener() {
 	webgazer.setGazeListener(function (data) {
 		if (data == null) {
 			console.error("Webgazer data null")
@@ -19,14 +15,15 @@ function gazeListener() {
 		}
 		sendCoordinates(data.x, data.y);
 	}).begin();
+};
+
+async function getPrediction() {
+	var prediction = await webgazer.getCurrentPrediction();
+	sendCoordinates(prediction.x, prediction.y);
 }
-function sendCoordinates(x, y) {
-	gazeListener();
+
+async function sendCoordinates(x, y) {
+	getPrediction();
 	chrome.runtime.sendMessage({ type: 'scroll', coordinates: { x, y } }, (response) => {
-		if (!response) {
-			reject(chrome.runtime.lastError);
-		} else {
-			resolve(response.response)
-		}
 	});
 }
