@@ -23,9 +23,9 @@ function average(data) {
     accumulator.y += currentValue.y;
     return accumulator;
   }, { x: 0, y: 0 });
-  avgX = total.x / data.length;
-  avgY = total.y / data.length;
-  return { x: avgX, y: avgY };
+  const avgX = total.x / data.length;
+  const avgY = total.y / data.length;
+  return { avgX: avgX, avgY: avgY };
 }
 
 // Receive coordinates and execute scrolling on window
@@ -110,42 +110,51 @@ function scroll(x, y) {
     y: y,
   });
 
-  if (allData.length > 5) {
+  if (allData.length > 3) {
     allData.shift();
   }
   
   var { avgX, avgY } = average(allData);
 
-  let point = document.getElementById("point");
-  if (point == undefined) {
-    point = document.createElement("div");
-    point.id = "point";
-    point.style = `
-      position:fixed;
-      width:20px;
-      height:20px;
-      border-radius:50%;
-      background-color: red;
-      border:0.5px solid black;
-      `;
-    // document.body.appendChild(point);
-  }
-  point.style.left = `${avgX}px`;
-  point.style.top = `${avgY}px`;
+  // let point = document.getElementById("point");
+  // if (point == undefined) {
+  //   point = document.createElement("div");
+  //   point.id = "point";
+  //   point.style = `
+  //     position:fixed;
+  //     width:20px;
+  //     height:20px;
+  //     border-radius:50%;
+  //     background-color: red;
+  //     border:0.5px solid black;
+  //     `;
+  //   // document.body.appendChild(point);
+  // }
+  // point.style.left = `${avgX}px`;
+  // point.style.top = `${avgY}px`;
 
   let dpr = window.devicePixelRatio;
-  let staticViewPort = window.innerHeight / 100 * dpr;
+  let staticViewPort = window.innerHeight / 200 * dpr;
   let deviation = centre.y - avgY
-  if (Math.abs(deviation) > staticViewPort * 2) {
+
+  // Recalibration
+  if (Math.abs(deviation) > staticViewPort) {
+    console.log("Add recalibrationData");
     recalibrationData.push({
       x: 0,
       y: deviation
     });
+  } else {
+    console.log("Remove recalibrationData");
+    recalibrationData.pop(); // Removes outliers
   }
 
+  // Persistent outliers
   if (recalibrationData.length > 100) {
-    var { avgDevX, avgDevY } = average(recalibrationData);
-    // TODO Recalibrate centre
+    console.log("RECALIBRATE");
+    var { avgX, avgY } = average(recalibrationData);
+    centre.y -= avgY - staticViewPort
+    recalibrationData.length = 0;
   }
 
   if (deviation > 0) {
@@ -153,6 +162,7 @@ function scroll(x, y) {
   }
   console.log(staticViewPort);
   console.log(centre.y);
+  console.log(deviation);
   if (Math.abs(deviation) > staticViewPort) {
     window.scrollBy({
       top: deviation,

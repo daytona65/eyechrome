@@ -7,14 +7,15 @@ document.body.appendChild(script);
 script.onload = function() {
     webgazer.showPredictionPoints(false);
     webgazer.showVideo(false);
-	webgazer.setRegression("ridge");
-	webgazer.setGazeListener(function (data) {
+	webgazer.applyKalmanFilter(true);
+	webgazer.removeMouseEventListeners();
+	webgazer.setGazeListener((data) => {
 		if (data == null) {
-			console.error("Webgazer data null")
 			return;
 		}
 		sendCoordinates(data.x, data.y);
 	}).begin();
+	
 };
 
 async function getPrediction() {

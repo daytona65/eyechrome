@@ -15,12 +15,11 @@ getState().then(async (response) => {
 		script.onload = function() {
 			webgazer.showPredictionPoints(false);
 			webgazer.showVideo(false);
-			webgazer.setRegression("ridge");
 			webgazer.setGazeListener(function (data) {
 				enableLoadingButton();
 			}).begin();
 		};
-		await loadingButton();
+		loadingButton();
 	} else if (isStreamActive) {
 		document.querySelector('#toggleWebcam').innerHTML =
 		'Disable';
