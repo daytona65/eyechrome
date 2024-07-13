@@ -90,8 +90,8 @@ async function calibrate(x, y) {
       calibratePoint.style.background = 'green';
       calibratePoint.style.color = 'white';
       calibratePoint.innerHTML = "Eyechrome Calibrated!"
-      setTimeout(() => calibratePoint.remove(), 3000);
       calibrated = true;
+      setTimeout(() => calibratePoint.remove(), 3000);
       centre = calibrationData.reduce((accumulator, currentValue) => {
         accumulator.x += currentValue.x;
         accumulator.y += currentValue.y;
@@ -116,56 +116,39 @@ function scroll(x, y) {
   
   var { avgX, avgY } = average(allData);
 
-  // let point = document.getElementById("point");
-  // if (point == undefined) {
-  //   point = document.createElement("div");
-  //   point.id = "point";
-  //   point.style = `
-  //     position:fixed;
-  //     width:20px;
-  //     height:20px;
-  //     border-radius:50%;
-  //     background-color: red;
-  //     border:0.5px solid black;
-  //     `;
-  //   // document.body.appendChild(point);
-  // }
-  // point.style.left = `${avgX}px`;
-  // point.style.top = `${avgY}px`;
-
   let dpr = window.devicePixelRatio;
-  let staticViewPort = window.innerHeight / 200 * dpr;
+  let deviationLimit = window.innerHeight / 100 * dpr;
   let deviation = centre.y - avgY
 
-  // Recalibration
-  if (Math.abs(deviation) > staticViewPort) {
-    console.log("Add recalibrationData");
-    recalibrationData.push({
-      x: 0,
-      y: deviation
-    });
-  } else {
-    console.log("Remove recalibrationData");
-    recalibrationData.pop(); // Removes outliers
-  }
+  // // Recalibration
+  // if (Math.abs(deviation) > staticViewPort*1.5) {
+  //   console.log("Add recalibrationData");
+  //   recalibrationData.push({
+  //     x: 0,
+  //     y: deviation
+  //   });
+  // } else {
+  //   console.log("Remove recalibrationData");
+  //   recalibrationData.pop(); // Removes outliers
+  // }
 
-  // Persistent outliers
-  if (recalibrationData.length > 100) {
-    console.log("RECALIBRATE");
-    var { avgX, avgY } = average(recalibrationData);
-    centre.y -= avgY - staticViewPort
-    recalibrationData.length = 0;
-  }
+  // // Persistent outliers
+  // if (recalibrationData.length > 30) {
+  //   console.log("RECALIBRATE");
+  //   var { avgX, avgY } = average(recalibrationData);
+  //   centre.y -= avgY - staticViewPort
+  //   recalibrationData.length = 0;
+  // }
 
-  if (deviation > 0) {
-    deviation *= 1.1
+  if (deviation < 0) { // Upscrolling
+    deviation *= 1.6
   }
-  console.log(staticViewPort);
+  console.log(deviationLimit);
   console.log(centre.y);
   console.log(deviation);
-  if (Math.abs(deviation) > staticViewPort) {
+  if (Math.abs(deviation) > deviationLimit) {
     window.scrollBy({
-      top: deviation,
+      top: deviation < 0 ? -4 : 4,
       left: 0,
       behavior: "smooth",
     });
