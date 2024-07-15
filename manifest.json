@@ -32,8 +32,6 @@
       "scripting",
       "offscreen",
       "background",
-      "tabs",
-      "userScripts",
       "storage",
       "unlimitedStorage"
     ],
