@@ -31,7 +31,7 @@ function average(data) {
 // Receive coordinates and execute scrolling on window
 chrome.runtime.onMessage.addListener(async (data, sender, sendResponse) => {
   if (data.type = 'scroll') {
-    console.log("Data received", data.coordinates)
+    // console.log("Data received", data.coordinates)
     var { x, y } = data.coordinates
     if (calibrated) {
       scroll(x, y);
@@ -143,9 +143,9 @@ function scroll(x, y) {
   if (deviation < 0) { // Upscrolling
     deviation *= 1.6
   }
-  console.log(deviationLimit);
-  console.log(centre.y);
-  console.log(deviation);
+  // console.log(deviationLimit);
+  // console.log(centre.y);
+  // console.log(deviation);
   if (Math.abs(deviation) > deviationLimit) {
     window.scrollBy({
       top: deviation < 0 ? -4 : 4,
